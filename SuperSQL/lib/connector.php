@@ -33,6 +33,7 @@ class SQLResponse implements \ArrayAccess, \Iterator
     public $outTypes;
     public $complete = true;
     public $stmt;
+    private $filter;
     /**
      * Gets data from a query
      */
@@ -69,6 +70,14 @@ class SQLResponse implements \ArrayAccess, \Iterator
             $this->stmt = null;
         }
     }
+
+    /**
+    * Add middleware to filter fetched rows
+    */
+    public function setFilter($callable){
+        $this->filter = $callable;
+    }
+
     /**
      * Gets next row from database
      */
@@ -79,6 +88,8 @@ class SQLResponse implements \ArrayAccess, \Iterator
             if ($this->outTypes) {
                 $this->map($row, $this->outTypes);
             }
+            if($this->filter != null)
+                $this->filter(&$row);
             array_push($this->result, $row);
             return $row;
         } else {
